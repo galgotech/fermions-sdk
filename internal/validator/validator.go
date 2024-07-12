@@ -7,8 +7,8 @@ import (
 	"github.com/santhosh-tekuri/jsonschema/v6"
 	"sigs.k8s.io/yaml"
 
+	"github.com/galgotech/fermions-sdk/graph"
 	"github.com/galgotech/fermions-sdk/internal/dsl"
-	"github.com/galgotech/fermions-sdk/internal/graph"
 )
 
 var schema *jsonschema.Schema

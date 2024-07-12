@@ -1,6 +1,6 @@
 package builder
 
-import "github.com/galgotech/fermions-sdk/internal/graph"
+import "github.com/galgotech/fermions-sdk/graph"
 
 type CallKind string
 

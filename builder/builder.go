@@ -22,7 +22,7 @@ func Validate(builder *WorkflowBuilder) error {
 }
 
 func Json(builder *WorkflowBuilder) ([]byte, error) {
-	data, err := json.MarshalIndent(builder.node(), "", "  ")
+	data, err := json.MarshalIndent(builder.Node(), "", "  ")
 	if err != nil {
 		return nil, err
 	}

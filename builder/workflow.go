@@ -1,7 +1,7 @@
 package builder
 
 import (
-	"github.com/galgotech/fermions-sdk/internal/graph"
+	"github.com/galgotech/fermions-sdk/graph"
 	"github.com/galgotech/fermions-sdk/internal/load"
 )
 
@@ -33,7 +33,7 @@ func (b *WorkflowBuilder) Use() *UseBuilder {
 	return b.use
 }
 
-func (b *WorkflowBuilder) node() *graph.Node {
+func (b *WorkflowBuilder) Node() *graph.Node {
 	return b.root
 }
 

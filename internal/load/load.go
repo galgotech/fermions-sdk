@@ -6,8 +6,10 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/galgotech/fermions-sdk/internal/graph"
 	"sigs.k8s.io/yaml"
+
+	"github.com/galgotech/fermions-sdk/graph"
+	"github.com/galgotech/fermions-sdk/internal/dsl"
 )
 
 const (
@@ -50,6 +52,11 @@ func FromJSONSource(fileBytes []byte) (*graph.Node, []byte, error) {
 	}
 
 	err = graph.LoadExternalResource(root)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	err = dsl.ApplyDefault(root)
 	if err != nil {
 		return nil, nil, err
 	}

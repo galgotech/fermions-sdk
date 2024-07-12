@@ -7,15 +7,40 @@ import (
 	"strings"
 )
 
+type Lookup struct {
+	nodes []*Node
+}
+
+func (l Lookup) Empty() bool {
+	return len(l.nodes) == 0
+}
+
+func (l Lookup) First() *Node {
+	return l.nodes[0]
+}
+
+func (l Lookup) Get(index int) *Node {
+	return l.nodes[index]
+}
+
+func (l Lookup) List() []*Node {
+	return l.nodes
+}
+
 type Node struct {
-	value interface{}
-	order []string
-	edges map[string]*Node
-	list  bool
+	value  interface{}
+	order  []string
+	parent *Node
+	edges  map[string]*Node
+	list   bool
 }
 
 func (n *Node) List(list bool) {
 	n.list = list
+}
+
+func (n *Node) IsList() bool {
+	return n.list
 }
 
 func (n *Node) UnmarshalJSON(data []byte) error {
@@ -32,6 +57,7 @@ func (n *Node) Edge(name string) *Node {
 	}
 	if _, ok := n.edges[name]; !ok {
 		n.edges[name] = NewNode()
+		n.parent = n
 		n.order = append(n.order, name)
 	}
 	return n.edges[name]
@@ -76,6 +102,10 @@ func (n *Node) GetFloat() float32 {
 	return n.value.(float32)
 }
 
+func (n *Node) HasValue() bool {
+	return n.value != nil
+}
+
 func (n *Node) Clear() *Node {
 	n.value = nil
 	n.edges = map[string]*Node{}
@@ -83,7 +113,23 @@ func (n *Node) Clear() *Node {
 	return n
 }
 
-func (n *Node) Lookup(path string) *Node {
+func (n *Node) Parent() *Node {
+	return n.parent
+}
+
+func (n *Node) Edges() map[string]*Node {
+	return n.edges
+}
+
+func (n *Node) Index(i int) (string, *Node) {
+	lookup := n.Lookup(n.order[i])
+	if !lookup.Empty() {
+		return n.order[i], lookup.First()
+	}
+	return "", nil
+}
+
+func (n *Node) Lookup(path string) Lookup {
 	dotIndex := strings.Index(path, ".")
 	var key string
 	if dotIndex == -1 {
@@ -94,25 +140,46 @@ func (n *Node) Lookup(path string) *Node {
 	}
 
 	var currentNode *Node
-	if n.list && key == "*" {
+	if key == "*" {
+		nodes := []*Node{}
 		if dotIndex == -1 {
-			return n
+			for _, node := range n.Edges() {
+				nodes = append(nodes, node)
+			}
+			return Lookup{nodes}
 		}
 		for _, node := range n.edges {
-			currentNode = node.Lookup(path)
-			if currentNode != nil {
-				return currentNode
+			if nodesLookup := node.Lookup(path); !nodesLookup.Empty() {
+				nodes = append(nodes, nodesLookup.List()...)
 			}
 		}
-		return nil
+		return Lookup{nodes}
+
 	}
 
-	currentNode = n.Edge(key)
+	equalIndex := strings.Index(key, "=")
+	if equalIndex != -1 {
+		value := key[equalIndex+1:]
+		key := key[:equalIndex]
+
+		lookup := n.Lookup(key)
+		if !lookup.Empty() && lookup.First().value != value {
+			return Lookup{}
+		}
+
+		if dotIndex != -1 {
+			return n.Lookup(path)
+		}
+
+		return Lookup{[]*Node{n}}
+	}
+
+	currentNode = n.edges[key]
 	if currentNode == nil {
-		return nil
+		return Lookup{}
 	}
 	if dotIndex == -1 {
-		return currentNode
+		return Lookup{[]*Node{currentNode}}
 	}
 
 	return currentNode.Lookup(path)

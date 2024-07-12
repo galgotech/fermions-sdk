@@ -3,7 +3,7 @@ package builder
 import (
 	"fmt"
 
-	"github.com/galgotech/fermions-sdk/internal/graph"
+	"github.com/galgotech/fermions-sdk/graph"
 )
 
 type DoBuilder struct {
