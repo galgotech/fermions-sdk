@@ -57,7 +57,6 @@ properties:
         type: array
         items:
           type: object
-          title: ExtensionItem
           minProperties: 1
           maxProperties: 1
           additionalProperties:
@@ -109,7 +108,6 @@ $defs:
     type: array
     items:
       type: object
-      title: TaskItem
       minProperties: 1
       maxProperties: 1
       additionalProperties:
@@ -162,7 +160,6 @@ $defs:
             type: string
             const: asyncapi
           with:
-            title: WithAsyncAPI
             type: object
             properties:
               document:
@@ -184,8 +181,10 @@ $defs:
                 type: object
                 description: The payload to call the AsyncAPI operation with, if any.
               authentication:
-                $ref: '#/$defs/referenceableAuthenticationPolicy'
                 description: The authentication policy, if any, to use when calling the AsyncAPI operation.
+                oneOf:
+                  - $ref: '#/$defs/authenticationPolicy'
+                  - type: string
             required: [ document, operationRef ]
             additionalProperties: false
             description: Defines the AsyncAPI call to perform.
@@ -199,7 +198,6 @@ $defs:
             type: string
             const: grpc
           with:
-            title: WithGRPC
             type: object
             properties:
               proto:
@@ -221,8 +219,10 @@ $defs:
                     max: 65535
                     description: The port number of the GRPC service to call.
                   authentication:
-                    $ref: '#/$defs/referenceableAuthenticationPolicy'
                     description: The endpoint's authentication policy, if any.
+                    oneOf:
+                      - $ref: '#/$defs/authenticationPolicy'
+                      - type: string
                 required: [ name, host ]
               method:
                 type: string
@@ -244,7 +244,6 @@ $defs:
             type: string
             const: http
           with:
-            title: WithHTTP
             type: object
             properties:
               method:
@@ -278,7 +277,6 @@ $defs:
             type: string
             const: openapi
           with:
-            title: WithOpenAPI
             type: object
             properties:
               document:
@@ -292,8 +290,10 @@ $defs:
                 additionalProperties: true
                 description: A name/value mapping of the parameters of the OpenAPI operation to call.
               authentication:
-                $ref: '#/$defs/referenceableAuthenticationPolicy'
                 description: The authentication policy, if any, to use when calling the OpenAPI operation.
+                oneOf:
+                  - $ref: '#/$defs/authenticationPolicy'
+                  - type: string
               output:
                 type: string
                 enum: [ raw, content, response ]
@@ -444,8 +444,7 @@ $defs:
       run:
         type: object
         oneOf:
-          - title: RunContainer
-            properties:
+          - properties:
               container:
                 type: object
                 properties:
@@ -462,14 +461,12 @@ $defs:
                     type: object
                     description: The container's volume mappings, if any.
                   environment:
-                    title: ContainerEnvironment
                     type: object
                     description: A key/value mapping of the environment variables, if any, to use when running the configured process.
                 required: [ image ]
             required: [ container ]
             description: Enables the execution of external processes encapsulated within a containerized environment.
-          - title: RunScript
-            properties:
+          - properties:
               script:
                 type: object
                 properties:
@@ -477,19 +474,16 @@ $defs:
                     type: string
                     description: The language of the script to run.
                   environment:
-                    title: ScriptEnvironment
                     type: object
                     additionalProperties: true
                     description: A key/value mapping of the environment variables, if any, to use when running the configured process.
                 oneOf:
-                  - title: ScriptInline
-                    properties:
+                  - properties:
                       code:
                         type: string
                     required: [ code ]
                     description: The script's code.
-                  - title: ScriptExternal
-                    properties:
+                  - properties:
                       source:
                         $ref: '#/$defs/externalResource'
                     description: The script's resource.
@@ -497,8 +491,7 @@ $defs:
                 required: [ language ]
             required: [ script ]
             description: Enables the execution of custom scripts or code within a workflow, empowering workflows to perform specialized logic, data processing, or integration tasks by executing user-defined scripts written in various programming languages.
-          - title: RunShell
-            properties:
+          - properties:
               shell:
                 type: object
                 properties:
@@ -506,22 +499,18 @@ $defs:
                     type: string
                     description: The shell command to run.
                   arguments:
-                    title: ShellArguments
                     type: object
                     additionalProperties: true
                     description: A list of the arguments of the shell command to run.
                   environment:
-                    title: ShellEnvironment
                     type: object
                     additionalProperties: true
                     description: A key/value mapping of the environment variables, if any, to use when running the configured process.
                 required: [ command ]
             required: [ shell ]
             description: Enables the execution of shell commands within a workflow, enabling workflows to interact with the underlying operating system and perform system-level operations, such as file manipulation, environment configuration, or system administration tasks.
-          - title: RunWokflow
-            properties:
+          - properties:
               workflow:
-                title: RunWorkflowDescriptor
                 type: object
                 properties:
                   namespace:
@@ -535,7 +524,6 @@ $defs:
                     default: latest
                     description: The version of the workflow to run. Defaults to latest
                   input:
-                    title: WorkflowInput
                     type: object
                     additionalProperties: true
                     description: The data, if any, to pass as input to the workflow to execute. The value should be validated against the target workflow's input schema, if specified.
@@ -568,10 +556,8 @@ $defs:
           type: object
           minProperties: 1
           maxProperties: 1
-          title: SwitchItem
           additionalProperties:
             type: object
-            title: SwitchCase
             properties:
               name:
                 type: string
@@ -596,7 +582,6 @@ $defs:
         type: object
         properties:
           errors:
-            title: CatchErrors
             type: object
           as:
             type: string
@@ -630,104 +615,76 @@ $defs:
         enum: [ continue, exit, end ]
         default: continue
       - type: string
-  referenceableAuthenticationPolicy:
-    type: object
-    oneOf:
-      - title: AuthenticationPolicyReference
-        properties:
-          use:
-            type: string
-            minLength: 1
-            description: The name of the authentication policy to use
-        required: [use]
-      - $ref: '#/$defs/authenticationPolicy'
-  secretBasedAuthenticationPolicy:
-    type: object
-    properties:
-      use:
-        type: string
-        minLength: 1
-        description: The name of the authentication policy to use
-    required: [use]
   authenticationPolicy:
     type: object
     oneOf:
-    - title: BasicAuthenticationPolicy 
-      properties:
+    - properties:
         basic:
           type: object
-          oneOf:
-            - properties:
-                username:
-                  type: string
-                  description: The username to use.
-                password:
-                  type: string
-                  description: The password to use.
-              required: [ username, password ]
-            - $ref: '#/$defs/secretBasedAuthenticationPolicy'
+          properties:
+            username:
+              type: string
+              description: The username to use.
+            password:
+              type: string
+              description: The password to use.
+          required: [ username, password ]
       required: [ basic ]
       description: Use basic authentication.
-    - title: BearerAuthenticationPolicy
-      properties:
+    - properties:
         bearer:
           type: object
-          oneOf:
-            - properties:
-                token:
-                  type: string
-                  description: The bearer token to use.
-              required: [ token ]
-            - $ref: '#/$defs/secretBasedAuthenticationPolicy'
+          properties:
+            token:
+              type: string
+              description: The bearer token to use.
+          required: [ token ]
       required: [ bearer ]
       description: Use bearer authentication.
-    - title: OAuth2AuthenticationPolicy
-      properties:
+    - properties:
         oauth2:
           type: object
-          oneOf:
-            - properties:
-                authority:
+          properties:
+            authority:
+              type: string
+              format: uri
+              description: The URI that references the OAuth2 authority to use.
+            grant:
+              type: string
+              description: The grant type to use.
+            client:
+              type: object
+              properties:
+                id:
                   type: string
-                  format: uri
-                  description: The URI that references the OAuth2 authority to use.
-                grant:
+                  description: The client id to use.
+                secret:
                   type: string
-                  description: The grant type to use.
-                client:
-                  type: object
-                  properties:
-                    id:
-                      type: string
-                      description: The client id to use.
-                    secret:
-                      type: string
-                      description: The client secret to use, if any.
-                  required: [ id ]
-                scopes:
-                  type: array
-                  items:
-                    type: string
-                  description: The scopes, if any, to request the token for.
-                audiences:
-                  type: array
-                  items:
-                    type: string
-                  description: The audiences, if any, to request the token for.
-                username:
-                  type: string
-                  description: The username to use. Used only if the grant type is Password.
-                password:
-                  type: string
-                  description: The password to use. Used only if the grant type is Password.
-                subject:
-                  $ref: '#/$defs/oauth2Token'
-                  description: The security token that represents the identity of the party on behalf of whom the request is being made.
-                actor:
-                  $ref: '#/$defs/oauth2Token'
-                  description: The security token that represents the identity of the acting party.
-              required: [ authority, grant, client ]
-            - $ref: '#/$defs/secretBasedAuthenticationPolicy'
+                  description: The client secret to use, if any.
+              required: [ id ]
+            scopes:
+              type: array
+              items:
+                type: string
+              description: The scopes, if any, to request the token for.
+            audiences:
+              type: array
+              items:
+                type: string
+              description: The audiences, if any, to request the token for.
+            username:
+              type: string
+              description: The username to use. Used only if the grant type is Password.
+            password:
+              type: string
+              description: The password to use. Used only if the grant type is Password.
+            subject:
+              $ref: '#/$defs/oauth2Token'
+              description: The security token that represents the identity of the party on behalf of whom the request is being made.
+            actor:
+              $ref: '#/$defs/oauth2Token'
+              description: The security token that represents the identity of the acting party.
+          required: [ authority, grant, client ]
       required: [ oauth2 ]
       description: Use OAUTH2 authentication.
     description: Defines an authentication policy.
@@ -790,30 +747,29 @@ $defs:
         format: uri-template
         description: The endpoint's URI.
       authentication:
-        $ref: '#/$defs/referenceableAuthenticationPolicy'
         description: The authentication policy to use.
+        oneOf:
+          - $ref: '#/$defs/authenticationPolicy'
+          - type: string
     required: [ uri ]
   eventConsumptionStrategy:
     type: object
     oneOf:
-      - title: AllEventConsumptionStrategy
-        properties:
+      - properties:
           all:
             type: array
             items:
               $ref: '#/$defs/eventFilter'
             description: A list containing all the events that must be consumed.
         required: [ all ]
-      - title: AnyEventConsumptionStrategy
-        properties:
+      - properties:
           any:
             type: array
             items:
               $ref: '#/$defs/eventFilter'
             description: A list containing any of the events to consume.
         required: [ any ]
-      - title: OneEventConsumptionStrategy
-        properties:
+      - properties:
           one:
             $ref: '#/$defs/eventFilter'
             description: The single event to consume.
@@ -822,7 +778,6 @@ $defs:
     type: object
     properties:
       with:
-        title: WithEvent
         type: object
         minProperties: 1
         properties:
@@ -883,16 +838,17 @@ $defs:
     oneOf:
       - type: string
         format: uri
-      - title: ExternalResourceURI
-        type: object
+      - type: object
         properties:
           uri:
             type: string
             format: uri
             description: The endpoint's URI.
           authentication:
-            $ref: '#/$defs/referenceableAuthenticationPolicy'
             description: The authentication policy to use.
+            oneOf:
+              - $ref: '#/$defs/authenticationPolicy'
+              - type: string
           name:
             type: string
             description: The external resource's name, if any.
@@ -904,9 +860,7 @@ $defs:
         $ref: '#/$defs/schema'
         description: The schema used to describe and validate the input of the workflow or task.
       from:
-        oneOf:
-          - type: string
-          - type: object
+        type: string
         description: A runtime expression, if any, used to mutate and/or filter the input of the workflow or task.
     description: Configures the input of a workflow or task.
   output:
@@ -916,9 +870,7 @@ $defs:
         $ref: '#/$defs/schema'
         description: The schema used to describe and validate the output of the workflow or task.
       as:
-        oneOf:
-          - type: string
-          - type: object
+        type: string
         description: A runtime expression, if any, used to mutate and/or filter the output of the workflow or task.
     description: Configures the output of a workflow or task.
   export:
@@ -928,9 +880,7 @@ $defs:
         $ref: '#/$defs/schema'
         description: The schema used to describe and validate the workflow context.
       as:
-        oneOf:
-          - type: string
-          - type: object
+        type: string
         description: A runtime expression, if any, used to export the output data to the context.
     description: Set the content of the context. 
   retryPolicy:
@@ -948,20 +898,17 @@ $defs:
       backoff:
         type: object
         oneOf:
-        - title: ConstantBackoff
-          properties:
+        - properties:
             constant:
               type: object
               description: The definition of the constant backoff to use, if any.
           required: [ constant ]
-        - title: ExponentialBackOff
-          properties:
+        - properties:
             exponential:
               type: object
               description: The definition of the exponential backoff to use, if any.
           required: [ exponential ]
-        - title: LinearBackoff
-          properties:
+        - properties:
             linear:
               type: object
               description: The definition of the linear backoff to use, if any.
@@ -1003,13 +950,11 @@ $defs:
         default: json
         description: The schema's format. Defaults to 'json'. The (optional) version of the format can be set using ` + "{format}:{version}" + `.
     oneOf:
-      - title: SchemaInline 
-        properties:
+      - properties:
           document:
             description: The schema's inline definition.
         required: [ document ]
-      - title: SchemaExternal
-        properties:
+      - properties:
           resource:
             $ref: '#/$defs/externalResource'
             description: The schema's external resource.
