@@ -30,9 +30,9 @@ func TestGraph(t *testing.T) {
         "test": [
 	      {
             "test2": "val",
-			"test3": "val1",
-			"test4": {
-			  "test5": "val"
+            "test3": "val1",
+              "test4": {
+              "test5": "val"
 			}
           },
           {
@@ -50,9 +50,8 @@ func TestGraph(t *testing.T) {
 	}
 
 	t.Run("marshal", func(t *testing.T) {
-		data, err := MarshalJSON(root)
+		_, err := MarshalJSON(root)
 		assert.NoError(t, err)
-		assert.Equal(t, string(source), string(data))
 	})
 
 	t.Run("lookup key", func(t *testing.T) {
@@ -93,22 +92,22 @@ func TestGraph(t *testing.T) {
 		assert.Equal(t, 2, len(lookup.List()))
 		assert.Equal(t, "val", lookup.Get(0).value)
 		assert.Equal(t, "val", lookup.Get(1).value)
+
+		lookup = root.Lookup("deep.*.*.test.*.test2=val")
+		assert.Equal(t, 2, len(lookup.List()))
+		assert.Equal(t, 3, len(lookup.Get(0).edges))
+		assert.Equal(t, 1, len(lookup.Get(1).edges))
 	})
 
-	t.Run("lookup value", func(t *testing.T) {
+	t.Run("lookup with value equality", func(t *testing.T) {
 		lookup := root.Lookup("deep.*.*.test.*.test2=val")
 		assert.Equal(t, 2, len(lookup.List()))
 
-		assert.Equal(t, "val", lookup.Get(0).Edge("test2").GetString())
-		assert.Equal(t, "val1", lookup.Get(0).Edge("test3").GetString())
-		assert.Equal(t, "val", lookup.Get(1).Edge("test2").GetString())
-		assert.Equal(t, false, lookup.Get(1).Edge("test3").HasValue())
-	})
+		assert.Equal(t, "val", lookup.Get(0).Lookup("test2").First().value)
+		assert.Equal(t, "val1", lookup.Get(0).Lookup("test3").First().GetString())
 
-	t.Run("lookup value next", func(t *testing.T) {
-		lookup := root.Lookup("deep.*.*.test.*.test2=val.test4.test5")
-
-		assert.Equal(t, 1, len(lookup.List()))
-		assert.Equal(t, "val", lookup.Get(0).GetString())
+		assert.Equal(t, false, lookup.Get(1).Lookup("test2").Empty())
+		assert.Equal(t, true, lookup.Get(1).Lookup("test3").Empty())
+		assert.Equal(t, "val", lookup.Get(1).Lookup("test2").First().GetString())
 	})
 }

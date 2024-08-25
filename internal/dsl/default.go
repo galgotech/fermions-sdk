@@ -5,10 +5,14 @@ import (
 )
 
 func ApplyDefault(node *graph.Node) error {
-	lookup := node.Lookup("do.*.*.call=http.with.content")
+	lookup := node.Lookup("do.*.*.call=http")
+
 	for _, node := range lookup.List() {
-		if !node.HasValue() {
-			node.SetString("content")
+		lookupEdged := node.Lookup("with.content")
+		for _, nodeEdge := range lookupEdged.List() {
+			if !nodeEdge.HasValue() {
+				nodeEdge.SetString("content")
+			}
 		}
 	}
 

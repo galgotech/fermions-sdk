@@ -52,12 +52,13 @@ func (n *Node) MarshalJSON() ([]byte, error) {
 }
 
 func (n *Node) Edge(name string) *Node {
-	if n.value != nil {
+	if n.HasValue() {
 		log.Fatal("value alredy defined, execute clear first")
 	}
 	if _, ok := n.edges[name]; !ok {
-		n.edges[name] = NewNode()
-		n.parent = n
+		newNode := NewNode()
+		newNode.parent = n
+		n.edges[name] = newNode
 		n.order = append(n.order, name)
 	}
 	return n.edges[name]
@@ -117,10 +118,6 @@ func (n *Node) Parent() *Node {
 	return n.parent
 }
 
-func (n *Node) Edges() map[string]*Node {
-	return n.edges
-}
-
 func (n *Node) Index(i int) (string, *Node) {
 	lookup := n.Lookup(n.order[i])
 	if !lookup.Empty() {
@@ -143,7 +140,7 @@ func (n *Node) Lookup(path string) Lookup {
 	if key == "*" {
 		nodes := []*Node{}
 		if dotIndex == -1 {
-			for _, node := range n.Edges() {
+			for _, node := range n.edges {
 				nodes = append(nodes, node)
 			}
 			return Lookup{nodes}
@@ -165,10 +162,6 @@ func (n *Node) Lookup(path string) Lookup {
 		lookup := n.Lookup(key)
 		if !lookup.Empty() && lookup.First().value != value {
 			return Lookup{}
-		}
-
-		if dotIndex != -1 {
-			return n.Lookup(path)
 		}
 
 		return Lookup{[]*Node{n}}
