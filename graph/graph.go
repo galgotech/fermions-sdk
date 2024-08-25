@@ -64,6 +64,10 @@ func (n *Node) Edge(name string) *Node {
 	return n.edges[name]
 }
 
+func (n *Node) Edges() map[string]*Node {
+	return n.edges
+}
+
 func (n *Node) SetString(value string) *Node {
 	n.setValue(value)
 	return n
