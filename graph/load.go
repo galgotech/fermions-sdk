@@ -1,4 +1,4 @@
-package load
+package graph
 
 import (
 	"fmt"
@@ -7,9 +7,6 @@ import (
 	"strings"
 
 	"sigs.k8s.io/yaml"
-
-	"github.com/galgotech/fermions-sdk/graph"
-	"github.com/galgotech/fermions-sdk/internal/dsl"
 )
 
 const (
@@ -20,7 +17,7 @@ const (
 
 var supportedExt = []string{extYAML, extYML, extJSON}
 
-func FromFile(path string) (*graph.Node, []byte, error) {
+func FromFile(path string) (*Node, []byte, error) {
 	if err := checkFilePath(path); err != nil {
 		return nil, nil, err
 	}
@@ -37,7 +34,7 @@ func FromFile(path string) (*graph.Node, []byte, error) {
 	return FromJSONSource(fileBytes)
 }
 
-func FromYAMLSource(source []byte) (*graph.Node, []byte, error) {
+func FromYAMLSource(source []byte) (*Node, []byte, error) {
 	jsonBytes, err := yaml.YAMLToJSON(source)
 	if err != nil {
 		return nil, nil, err
@@ -45,18 +42,18 @@ func FromYAMLSource(source []byte) (*graph.Node, []byte, error) {
 	return FromJSONSource(jsonBytes)
 }
 
-func FromJSONSource(fileBytes []byte) (*graph.Node, []byte, error) {
-	root, err := graph.UnmarshalJSON(fileBytes)
+func FromJSONSource(fileBytes []byte) (*Node, []byte, error) {
+	root, err := UnmarshalJSON(fileBytes)
 	if err != nil {
 		return nil, nil, err
 	}
 
-	err = graph.LoadExternalResource(root)
+	err = LoadExternalResource(root)
 	if err != nil {
 		return nil, nil, err
 	}
 
-	err = dsl.ApplyDefault(root)
+	err = ApplyDefault(root)
 	if err != nil {
 		return nil, nil, err
 	}

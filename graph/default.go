@@ -1,10 +1,6 @@
-package dsl
+package graph
 
-import (
-	"github.com/galgotech/fermions-sdk/graph"
-)
-
-func ApplyDefault(node *graph.Node) error {
+func ApplyDefault(node *Node) error {
 	lookup := node.Lookup("do.*.*.call=http")
 
 	for _, node := range lookup.List() {

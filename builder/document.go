@@ -1,6 +1,9 @@
 package builder
 
-import "github.com/galgotech/fermions-sdk/graph"
+import (
+	"github.com/galgotech/fermions-sdk/graph"
+	"github.com/galgotech/fermions-sdk/internal/dsl"
+)
 
 type DocumentBuilder struct {
 	root *graph.Node
@@ -54,6 +57,6 @@ func NewDocumentBuilder(root *graph.Node) *DocumentBuilder {
 	documentBuilder := &DocumentBuilder{
 		root: root,
 	}
-	documentBuilder.SetDSL("1.0.0-alpha1")
+	documentBuilder.SetDSL(dsl.DSLVersion)
 	return documentBuilder
 }

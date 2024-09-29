@@ -2,7 +2,6 @@ package builder
 
 import (
 	"github.com/galgotech/fermions-sdk/graph"
-	"github.com/galgotech/fermions-sdk/internal/load"
 )
 
 type WorkflowBuilder struct {
@@ -45,7 +44,7 @@ func NewWorkflowBuilder() *WorkflowBuilder {
 }
 
 func NewWorkflowBuilderFromFile(path string) (*WorkflowBuilder, error) {
-	root, _, err := load.FromFile(path)
+	root, _, err := graph.FromFile(path)
 	if err != nil {
 		return nil, err
 	}
@@ -56,7 +55,7 @@ func NewWorkflowBuilderFromFile(path string) (*WorkflowBuilder, error) {
 }
 
 func NewWorkflowBuilderFromYAMLSource(source []byte) (*WorkflowBuilder, error) {
-	root, _, err := load.FromYAMLSource(source)
+	root, _, err := graph.FromYAMLSource(source)
 	if err != nil {
 		return nil, err
 	}
@@ -67,7 +66,7 @@ func NewWorkflowBuilderFromYAMLSource(source []byte) (*WorkflowBuilder, error) {
 }
 
 func NewWorkflowBuilderFromJSONSource(source []byte) (*WorkflowBuilder, error) {
-	root, _, err := load.FromJSONSource(source)
+	root, _, err := graph.FromJSONSource(source)
 	if err != nil {
 		return nil, err
 	}

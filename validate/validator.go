@@ -1,13 +1,13 @@
 package validate
 
 import (
-	"github.com/galgotech/fermions-sdk/internal/load"
+	"github.com/galgotech/fermions-sdk/graph"
 	"github.com/galgotech/fermions-sdk/internal/validator"
 )
 
 // FromFile parses the given Serverless Workflow file into the Workflow type.
 func FromFile(path string) error {
-	root, fileBytes, err := load.FromFile(path)
+	root, fileBytes, err := graph.FromFile(path)
 	if err != nil {
 		return err
 	}
@@ -17,7 +17,7 @@ func FromFile(path string) error {
 
 // FromYAMLSource parses the given Serverless Workflow YAML source into the Workflow type.
 func FromYAMLSource(source []byte) error {
-	root, jsonBytes, err := load.FromYAMLSource(source)
+	root, jsonBytes, err := graph.FromYAMLSource(source)
 	if err != nil {
 		return err
 	}
@@ -27,7 +27,7 @@ func FromYAMLSource(source []byte) error {
 
 // FromJSONSource parses the given Serverless Workflow JSON source into the Workflow type.
 func FromJSONSource(source []byte) error {
-	root, jsonBytes, err := load.FromJSONSource(source)
+	root, jsonBytes, err := graph.FromJSONSource(source)
 	if err != nil {
 		return err
 	}
